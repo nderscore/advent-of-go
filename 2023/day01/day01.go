@@ -1,9 +1,8 @@
-package main
+package day01
 
 import (
 	_ "embed"
 	"errors"
-	"flag"
 	"fmt"
 	"strconv"
 	"strings"
@@ -12,17 +11,13 @@ import (
 //go:embed input.txt
 var input string
 
-func main() {
-	var part int
-	flag.IntVar(&part, "part", 1, "Part 1 or 2")
-	flag.Parse()
-
+func Run(part int) {
 	switch part {
 	case 1:
-		fmt.Println("Part 1")
+		fmt.Println("Day 1 Part 1")
 		part1()
 	case 2:
-		fmt.Println("Part 2")
+		fmt.Println("Day 1 Part 2")
 		part2()
 	default:
 		fmt.Println("Invalid part")
