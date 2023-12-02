@@ -2,6 +2,7 @@ package main
 
 import (
 	_ "embed"
+	"errors"
 	"flag"
 	"fmt"
 	"strconv"
@@ -36,14 +37,19 @@ func part1() {
 		var first, last *string
 		for i, char := range chars {
 			isNumeric := char >= "0" && char <= "9"
-			if isNumeric {
-				if first == nil {
-					first = &chars[i]
-				}
-				last = &chars[i]
+			if !isNumeric {
+				continue
 			}
+			if first == nil {
+				first = &chars[i]
+			}
+			last = &chars[i]
 		}
-		num, err := strconv.Atoi(strings.Join([]string{*first, *last}, ""))
+		if first == nil || last == nil {
+			fmt.Printf("No digits found on line <%s>\n", line)
+			continue
+		}
+		num, err := strconv.Atoi(*first + *last)
 		if err != nil {
 			fmt.Println(err)
 			return
@@ -54,19 +60,18 @@ func part1() {
 }
 
 func getDigits() []string {
-	return []string{"one", "two", "three", "four", "five", "six", "seven", "eight", "nine"}
+	return []string{"zero", "one", "two", "three", "four", "five", "six", "seven", "eight", "nine"}
 }
 
-func findDigitAtPosition(str string, pos int) int {
+func findDigitAtPosition(str string, pos int) (*int, error) {
 	digits := getDigits()
 	char := str[pos]
 	if char >= '0' && char <= '9' {
 		num, err := strconv.Atoi(string(char))
 		if err != nil {
-			return -1
+			return nil, errors.New("Unexpected unparseable character")
 		}
-		// fmt.Println("Digit", num, pos)
-		return num
+		return &num, nil
 	}
 
 	for i, digit := range digits {
@@ -76,33 +81,34 @@ func findDigitAtPosition(str string, pos int) int {
 		}
 		subStr := string(str[pos:endPosition])
 		if digit == subStr {
-			// fmt.Println("Word", i+1, pos)
-			return i + 1
+			return &i, nil
 		}
 	}
 
-	return -1
+	return nil, errors.New("No digit found")
 }
 
 func part2() {
 	total := 0
 	lines := strings.Split(input, "\n")
 	for _, line := range lines {
-		// fmt.Println(line)
-		first := -1
-		last := -1
+		var first, last *int
 		length := len(line)
 		for i := 0; i < length; i++ {
-			num := findDigitAtPosition(line, i)
-			if num != -1 {
-				if first == -1 {
-					first = num
-				}
-				last = num
+			num, err := findDigitAtPosition(line, i)
+			if err != nil {
+				continue
 			}
+			if first == nil {
+				first = num
+			}
+			last = num
 		}
-		// fmt.Println(first, last)
-		total += (first * 10) + last
+		if first == nil || last == nil {
+			fmt.Printf("No digits found on line <%s>\n", line)
+			continue
+		}
+		total += (*first * 10) + *last
 	}
 	fmt.Println(total)
 }
